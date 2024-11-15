@@ -8,11 +8,6 @@ Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](h
 - set txt list name
 - small ui style fixes
 
-### Currently working on
-- show a title above the spotlight banner, e.g. 'Popular at Jellyfin'
-- if local trailer available, play it instead of youtube trailer
-
-
 Testet on Jellyfin 10.10.0
 
 ---
