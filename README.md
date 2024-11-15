@@ -49,7 +49,7 @@ Testet on Jellyfin 10.10.0
 
 By default, the bar will feature content at random as long as it is available to the current user. 
 
-To preselect content, place a [list.txt](link) in the ```ui``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar). 
+To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar). 
 
 # Uninstallation
 
