@@ -22,11 +22,12 @@ Testet on Jellyfin 10.10.0
 
 3. In your Jellyfin Dashboard, under ```API Keys``` create an API key for Spotlight, copy the key, and insert it as the value for the ```token``` variable in ```script.js```. You can also set the corresponding values for list name, random selection, show it only on main page, plot length, etc.
 
-4. ```Important: Use Notepad++ for this``` In the jellyfin-web folder, open the file ```home-html.RANDOMSTRINGHERE.chunk.js```
+4. ```Important: Use Notepad++ for this```\
+   In the jellyfin-web folder, open the file ```home-html.RANDOMSTRINGHERE.chunk.js```
 
-5. Ctrl+F and search for ```data-backdroptype="movie,series,book">``` 
+6. Ctrl+F and search for ```data-backdroptype="movie,series,book">``` 
 
-6. Paste this after the >
+7. Paste this after the >
 
 ```js
 <style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em;}} </style> <iframe class="featurediframe" src="/web/ui/spotlight.html"></iframe>
