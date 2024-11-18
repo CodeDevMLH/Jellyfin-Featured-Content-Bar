@@ -30,7 +30,7 @@ Testet on Jellyfin 10.10.0
 7. Paste this after the >
 
 ```js
-<style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em;}} </style> <iframe class="featurediframe" src="/web/ui/spotlight.html"></iframe>
+<style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em; height: 25em;}} </style> <iframe class="featurediframe" src="/web/ui/spotlight.html"></iframe>
 ```
 7. Save the file.
 
