@@ -1,21 +1,31 @@
 # SpotlightTrailer - Featured Content Bar
 Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](https://github.com/BobHasNoSoul) & [MakD](https://github.com/MakD) & [tedhinklater](https://github.com/tedhinklater) for their talents and work
 
-# Main Differences in this fork
-- activate random selection of movie from txt list
+## Main Differences in this fork
+- automatically skip outros/endcards on trailers using SponsorBlock API
 - show the featured bar only at the main page, hide it in favorites/requests tab
-- back button added
-- set txt list name
+- set txt list name for eg. switch between diffrent seasonal versions
 - small ui style fixes
 
-Testet on Jellyfin 10.10.0
+Testet on Jellyfin 10.10.3
 
+## Table of Contents
+- [SpotlightTrailer - Featured Content Bar](#spotlighttrailer---featured-content-bar)
+  - [Main Differences in this fork](#main-differences-in-this-fork)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+- [Web View (Movie and series)](#web-view-movie-and-series)
+- [Mobile View (Landscape / Portrait)](#mobile-view-landscape--portrait)
+- [How to feature specific content in the bar](#how-to-feature-specific-content-in-the-bar)
+- [Uninstallation](#uninstallation)
+- [Fullscreen/MobileView on Deskzop Version](#fullscreenmobileview-on-deskzop-version)
 ---
+
 
 ![overview](/images/demo1.gif)
 
 
-## How to install
+## Installation
 1. Download [spotlight.html](/spotlight.html), [script.js](/script.js) and [styles.css](/styles.css)
 
 2. Go to your ```jellyfin-web``` folder and create a folder named ```ui``` and drop ```spotlight.html, script.js and styles.css``` in that folder
@@ -48,17 +58,19 @@ Testet on Jellyfin 10.10.0
 
 # How to feature specific content in the bar
 
-By default, the bar will feature content at random as long as it is available to the current user. 
+By default, the bar will feature content at random as long as it is available to the current user and no `list.txt` is available or if it is empty `below` line 1.
 
-To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar). 
+To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar).
+
+`IMPORTANT` If you use List.txt to preselect content and a User has an Age Rating limit on their account (U, PG etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
 
 # Uninstallation
 
 Simply delete Step 5's snippet added to ```home-html.chunk.js``` then refresh your browser's cache.
 
-# Fullscreen Version
+# Fullscreen/MobileView on Deskzop Version
 
-No changes here from my side...
+No changes here from my side for now
 
 ![fullscreen](/images/fullscreen.gif)
 
