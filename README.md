@@ -2,7 +2,7 @@
 Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](https://github.com/BobHasNoSoul) & [MakD](https://github.com/MakD) & [tedhinklater](https://github.com/tedhinklater) for their talents and work
 
 ## Main Differences in this fork
-- automatically skip outros/endcards on trailers using SponsorBlock API
+- automatically skip outros/endcards and intros on trailers using SponsorBlock API
 - show the featured bar only at the main page, hide it in favorites/requests tab
 - set txt list name for eg. switch between diffrent seasonal versions
 - small ui style fixes
@@ -76,7 +76,11 @@ The following configuration parameters are used to customize the behavior and ap
   Default is `20`
 
 - **`useSponsorBlock`**:  
-  Enable (`true`) or disable (`false`) the use of SponsorBlock data for skipping segments (outros) in trailers.
+  Enable (`true`) or disable (`false`) the use of SponsorBlock data for skipping segments (outros, intros) in trailers.
+  Default is `true`
+
+- **`skipIntro`**:  
+  Enable (`true`) or disable (`false`) to skip the intro segment of the trailer.
   Default is `true`
 
 - **`plotMaxLength`**:  
