@@ -310,7 +310,7 @@ const createSlideElement = (movie, hasVideo = false) => {
 
                             if (outro) {
                                 console.log(`SponsorBlock outro segment: Start - ${outro[0]}s, End - ${outro[1]}s`);
-                                monitorOutro(player, outroSegment);
+                                monitorOutro(player, outro);
                             } else {
                                 console.log('No outro segment found/provided');
                             }
