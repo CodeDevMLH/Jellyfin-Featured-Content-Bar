@@ -8,7 +8,7 @@ let setRandomMovie = true; // Set to false to disable random movie selection fro
 let showOnOtherPages = false; // Set to true to show the slideshow on all pages eg. favorites tab, requests tab, etc.
 //let showTitle = false; // Set to false to hide the title TBD
 let disableTrailerControls = true; // Set to false to enable trailer controls
-let setMuted = true; // Set to false to disable unmuting the video on hover
+let setMutedHover = true; // Set to false to disable unmuting the video on hover
 let umuteOnHover = true; // Set to false to disable unmuting the video on hover
 let unmutedVolume = 20; // Set the volume level when the video is unmuted
 let useSponsorBlock = true; // Set to true to use SponsorBlock data to skip intro/outro segments of trailers
@@ -25,7 +25,7 @@ let previousMovies = [];
 let forwardMovies = [];
 let monitorOutroInterval = null; // Global interval variable to monitor the outro segment of the trailer
 
-if (setMuted) {
+if (setMutedHover) {
     const slidesContainer = document.getElementById('slides-container');
     slidesContainer.addEventListener('mouseenter', () => {
         if (player) {
