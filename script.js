@@ -23,6 +23,7 @@ let currentLocation = window.top.location.href;
 let movieList = [], currentMovieIndex = 0;
 let previousMovies = [];
 let forwardMovies = [];
+let monitorOutroInterval = null; // Global interval variable to monitor the outro segment of the trailer
 
 if (setMuted) {
     const slidesContainer = document.getElementById('slides-container');
@@ -42,20 +43,21 @@ if (setMuted) {
 }
 
 // Get SponsorBlock-Data for the outro segment of the trailer
-const fetchSponsorBlockOutro = (videoId) => {
-    return fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&category=outro`)
-        .then(response => response.json())
-        .then(segments => {
-            return segments.length > 0 ? segments[0].segment : null;
-        })
-        .catch(error => {
-            console.error('Error fetching SponsorBlock data:', error);
-            return null;
-        });
+const fetchSponsorBlockOutro = async (videoId) => {
+    try {
+        const response = await fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&category=outro`);
+        const segments = await response.json();
+        if (segments.length > 0 && Array.isArray(segments[0].segment)) {
+            return segments[0].segment; // returns array: [start, end]
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching SponsorBlock data:', error);
+        return null;
+    }
 };
 
 // Monitor the video player for the outro segment
-let monitorOutroInterval = null; // Global interval variable
 function monitorOutro(player, outroSegment) {
     if (monitorOutroInterval) { // Clear the interval if it's already running
         clearInterval(monitorOutroInterval);
