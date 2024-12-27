@@ -62,8 +62,7 @@ const fetchSponsorBlockData = async (videoId) => {
         return { intro, outro };
     } catch (error) {
         console.error('Error fetching SponsorBlock data:', error);
-        return null;
-        //return { intro: null, outro: null };
+        return { intro: null, outro: null };
 
     }
 };
