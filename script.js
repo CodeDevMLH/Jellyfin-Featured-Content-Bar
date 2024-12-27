@@ -7,11 +7,12 @@ let useTrailers = true; // Set to false to disable trailers
 let setRandomMovie = true; // Set to false to disable random movie selection from the list
 let showOnOtherPages = false; // Set to true to show the slideshow on all pages eg. favorites tab, requests tab, etc.
 //let showTitle = false; // Set to false to hide the title TBD
-let disableTrailerControls = true; // Set to false to enable trailer controls
+let disableTrailerControls = false; // Set to false to enable trailer controls
 let setMutedHover = true; // Set to false to disable unmuting the video on hover
 let umuteOnHover = true; // Set to false to disable unmuting the video on hover
 let unmutedVolume = 20; // Set the volume level when the video is unmuted
 let useSponsorBlock = true; // Set to true to use SponsorBlock data to skip intro/outro segments of trailers
+let skipIntro = true; // Set to true to skip the intro segment of the trailer
 let plotMaxLength = 550; // Maximum number of characters in the plot
 let trailerMaxLength = 0; // Default value 0; length measured in ms, set to 0 to disable, could be used instead of SponsorBlock
 let isMuted = true; // Default value true; set to false to start the video unmuted
@@ -42,20 +43,31 @@ if (setMutedHover) {
     });
 }
 
-// Get SponsorBlock-Data for the outro segment of the trailer
-const fetchSponsorBlockOutro = async (videoId) => {
+// Get SponsorBlock-Data for the outro/intro segment of the trailer
+const fetchSponsorBlockData = async (videoId) => {
     try {
-        const response = await fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&category=outro`);
+        const response = await fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&categories=["intro","outro"]`);
         const segments = await response.json();
-        if (segments.length > 0 && Array.isArray(segments[0].segment)) {
-            return segments[0].segment; // returns array: [start, end]
-        }
-        return null;
+
+        let intro = null;
+        let outro = null;
+
+        segments.forEach(segment => {
+            if (segment.category === "intro" && Array.isArray(segment.segment)) {
+                intro = segment.segment; // [start, end] of the intro
+            } else if (segment.category === "outro" && Array.isArray(segment.segment)) {
+                outro = segment.segment; // [start, end] of the outro
+            }
+        });
+        return { intro, outro };
     } catch (error) {
         console.error('Error fetching SponsorBlock data:', error);
         return null;
+        //return { intro: null, outro: null };
+
     }
 };
+
 
 // Monitor the video player for the outro segment
 function monitorOutro(player, outroSegment) {
@@ -286,15 +298,24 @@ const createSlideElement = (movie, hasVideo = false) => {
             events: {
                 'onReady': event => {                    
                     if (useSponsorBlock) {
-                        fetchSponsorBlockOutro(videoId).then(outroSegment => {
-                            if (outroSegment) {
-                                console.log(`SponsorBlock outro segment: Start - ${outroSegment[0]}s, End - ${outroSegment[1]}s`);
+                        fetchSponsorBlockData(videoId).then(({ intro, outro }) => {
+                            if (intro && skipIntro) {
+                                console.log(`SponsorBlock intro segment: Start - ${intro[0]}s, End - ${intro[1]}s`);
+                                if (player && typeof player.seekTo === 'function') {
+                                    player.seekTo(intro[1], true);
+                                }
+                            } else {
+                                console.log('No intro segment found/provided or intro skipping is disabled');
+                            }
+
+                            if (outro) {
+                                console.log(`SponsorBlock outro segment: Start - ${outro[0]}s, End - ${outro[1]}s`);
                                 monitorOutro(player, outroSegment);
                             } else {
                                 console.log('No outro segment found/provided');
                             }
                         }).catch(error => {
-                            console.error('Error reading SponsorBlock outro segment:', error);
+                            console.error('Error reading SponsorBlock data:', error);
                         });
                     }
                     if (trailerMaxLength > 0) {
