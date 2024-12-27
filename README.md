@@ -16,10 +16,10 @@ Testet on Jellyfin 10.10.3
   - [Table of Contents](#table-of-contents)
   - [Configuration Parameters](#configuration-parameters)
   - [Installation](#installation)
+  - [Uninstall](#uninstall)
+  - [How to feature specific content in the bar](#how-to-feature-specific-content-in-the-bar)
 - [Web View (Movie and series)](#web-view-movie-and-series)
 - [Mobile View (Landscape / Portrait)](#mobile-view-landscape--portrait)
-- [How to feature specific content in the bar](#how-to-feature-specific-content-in-the-bar)
-- [Uninstallation](#uninstallation)
 - [Fullscreen/MobileView on Deskzop Version](#fullscreenmobileview-on-deskzop-version)
 ---
 
@@ -118,13 +118,11 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 ![clips](/images/all_clips.gif)
 
-# Web View (Movie and series)
-![mobile](/images/desktop.png)
+## Uninstall
 
-# Mobile View (Landscape / Portrait)
-![mobile](/images/mobile.png)
+Simply delete Step 7's snippet added to ```home-html.chunk.js``` then refresh your browser's cache. You can, but not have to delete the ui folder.
 
-# How to feature specific content in the bar
+## How to feature specific content in the bar
 
 By default, the bar will feature content at random as long as it is available to the current user and no `list.txt` is available or if it is empty `below` line 1.
 
@@ -132,9 +130,11 @@ To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and p
 
 `IMPORTANT` If you use List.txt to preselect content and a User has an Age Rating limit on their account (U, PG etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
 
-# Uninstallation
+# Web View (Movie and series)
+![mobile](/images/desktop.png)
 
-Simply delete Step 5's snippet added to ```home-html.chunk.js``` then refresh your browser's cache.
+# Mobile View (Landscape / Portrait)
+![mobile](/images/mobile.png)
 
 # Fullscreen/MobileView on Deskzop Version
 
