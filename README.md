@@ -6,6 +6,7 @@ Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](h
 - show the featured bar only at the main page, hide it in favorites/requests tab
 - set txt list name for eg. switch between diffrent seasonal versions
 - small ui style fixes
+- html, css and javascript in seperate files
 
 Testet on Jellyfin 10.10.3
 
@@ -13,6 +14,7 @@ Testet on Jellyfin 10.10.3
 - [SpotlightTrailer - Featured Content Bar](#spotlighttrailer---featured-content-bar)
   - [Main Differences in this fork](#main-differences-in-this-fork)
   - [Table of Contents](#table-of-contents)
+  - [Configuration Parameters](#configuration-parameters)
   - [Installation](#installation)
 - [Web View (Movie and series)](#web-view-movie-and-series)
 - [Mobile View (Landscape / Portrait)](#mobile-view-landscape--portrait)
@@ -24,15 +26,81 @@ Testet on Jellyfin 10.10.3
 
 ![overview](/images/demo1.gif)
 
+## Configuration Parameters
+
+The following configuration parameters are used to customize the behavior and appearance of the slideshow. You can adjust them at the beginning of `script.js`:
+
+- **`title`**:  
+  The title of the slideshow. Set this to a descriptive name for your slideshow. `To be done`
+
+- **`listFileName`**:  
+  The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
+
+- **`token`**:  
+  Your Jellyfin API key, which is required for accessing the Jellyfin API. Replace `"YOURAPIKEYHERE"` with your actual API key.
+
+- **`moviesSeriesBoth`**:  
+  Specifies the type of content to display:
+  - `1` for movies only,
+  - `2` for series only,
+  - `3` for both.
+  
+  Default is `3`
+
+- **`shuffleInterval`**:  
+  Time interval (in milliseconds) between slides, unless a trailer is playing. Adjust for desired slide transition speed.
+
+- **`useTrailers`**:  
+  Enable (`true`) or disable (`false`) the display of trailers in the slideshow.
+
+- **`setRandomMovie`**:  
+  Enable (`true`) or disable (`false`) random selection of movies or series from the list. Default is `true`
+
+- **`showOnOtherPages`**:  
+  Set to `true` to show the slideshow on additional pages, such as "Favorites" or "Requests." Default is `false`.
+
+- **`disableTrailerControls`**:  
+  Set to `true` to hide trailer controls; `false` enables user control over the trailer. Default is `true`
+
+- **`setMutedHover`**:  
+  Set to `false` to disable unmuting the video on hover
+  Default mute setting for trailers on hover over entire slideshow element:
+  Default is `true`
+
+- **`umuteOnHover`**:  
+  Unmute video when hovered over (`true`) or keep muted (`false`).
+  Default is `true`
+
+- **`unmutedVolume`**:  
+  Volume level (0–100) when unmuted.
+  Default is `20`
+
+- **`useSponsorBlock`**:  
+  Enable (`true`) or disable (`false`) the use of SponsorBlock data for skipping segments (outros) in trailers.
+  Default is `true`
+
+- **`plotMaxLength`**:  
+  Maximum number of characters for plot descriptions. Adjust as needed.
+
+- **`trailerMaxLength`**:  
+  Maximum duration (in milliseconds) of trailers. Set to `0` to disable trailer length limitation. Could be used instead of SponsorBlock, but SponsorBlock is recommended
+
+- **`isMuted`**:  
+  Default mute state of videos (`true` for muted, `false` for unmuted).
+
+By adjusting these parameters, you can fine-tune the slideshow's behavior and appearance to suit your needs.
+
 
 ## Installation
 1. Download [spotlight.html](/spotlight.html), [script.js](/script.js) and [styles.css](/styles.css)
 
-2. Go to your ```jellyfin-web``` folder and create a folder named ```ui``` and drop ```spotlight.html, script.js and styles.css``` in that folder
+2. Modify `script.js` like [explained above](#configuration-parameters) if necessary.
 
-3. In your Jellyfin Dashboard, under ```API Keys``` create an API key for Spotlight, copy the key, and insert it as the value for the ```token``` variable in ```script.js```. You can also set the corresponding values for list name, random selection, show it only on main page, plot length, etc.
+3. Go to your ```jellyfin-web``` folder and create a folder named ```ui``` and drop ```spotlight.html, script.js and styles.css``` in that folder
 
-4. ```Important: Use Notepad++ for this```\
+4. In your Jellyfin Dashboard, under ```API Keys``` create an API key for Spotlight, copy the key, and insert it as the value for the ```token``` variable in ```script.js```. You can also set the corresponding values for list name, random selection, show it only on main page, plot length, etc.
+
+5. ```Important: Use Notepad++ for this```\
    In the jellyfin-web folder, open the file ```home-html.RANDOMSTRINGHERE.chunk.js```
 
 6. Ctrl+F and search for ```data-backdroptype="movie,series,book">``` 
