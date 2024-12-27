@@ -18,13 +18,13 @@ Testet on Jellyfin 10.10.3
   - [Installation](#installation)
   - [Uninstall](#uninstall)
   - [How to feature specific content in the bar](#how-to-feature-specific-content-in-the-bar)
-- [Web View (Movie and series)](#web-view-movie-and-series)
+- [Desktop View](#desktop-view)
 - [Mobile View (Landscape / Portrait)](#mobile-view-landscape--portrait)
 - [Fullscreen/MobileView on Deskzop Version](#fullscreenmobileview-on-deskzop-version)
 ---
 
 
-![overview](/images/demo1.gif)
+![overview](https://github.com/user-attachments/assets/cb6c5a44-9121-4fbf-820c-e888efcf20aa)
 
 ## Configuration Parameters
 
@@ -116,7 +116,6 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 9. That's it.
 
-![clips](/images/all_clips.gif)
 
 ## Uninstall
 
@@ -130,17 +129,19 @@ To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and p
 
 `IMPORTANT` If you use List.txt to preselect content and a User has an Age Rating limit on their account (U, PG etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
 
-# Web View (Movie and series)
-![mobile](/images/desktop.png)
+![list](https://github.com/user-attachments/assets/5f8f7924-7a9b-49c1-aefa-198cefce0f60)
+
+# Desktop View
+![fcb](https://github.com/user-attachments/assets/eb0c9ce0-b96e-4a7e-bf71-ba9a637c25a3)
 
 # Mobile View (Landscape / Portrait)
-![mobile](/images/mobile.png)
+![mobile](https://i.imgur.com/OrOzpBK.png)
 
 # Fullscreen/MobileView on Deskzop Version
 
 No changes here from my side for now
 
-![fullscreen](/images/fullscreen.gif)
+![Screenshot 2024-11-24 133953](https://github.com/user-attachments/assets/ededdd38-c16b-40f4-b5e8-86a03c6522c0)
 
 Same as above except use [this version of spotlight.html](/fullscreen/spotlight.html) 
 
