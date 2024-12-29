@@ -9,13 +9,13 @@ let showOnOtherPages = false; // Set to true to show the slideshow on all pages 
 //let showTitle = false; // Set to false to hide the title TBD
 let disableTrailerControls = false; // Set to false to enable trailer controls
 let setMutedHover = true; // Set to false to disable unmuting the video on hover
-let umuteOnHover = true; // Set to false to disable unmuting the video on hover
 let unmutedVolume = 20; // Set the volume level when the video is unmuted
 let useSponsorBlock = true; // Set to true to use SponsorBlock data to skip intro/outro segments of trailers
 let skipIntro = true; // Set to true to skip the intro segment of the trailer
 let plotMaxLength = 550; // Maximum number of characters in the plot
 let trailerMaxLength = 0; // Default value 0; length measured in ms, set to 0 to disable, could be used instead of SponsorBlock
-let isMuted = true; // Default value true; set to false to start the video unmuted
+let startTrailerMuted = true; // Default value true; set to false to start the video unmuted
+
 
 
 // variables
@@ -25,23 +25,7 @@ let movieList = [], currentMovieIndex = 0;
 let previousMovies = [];
 let forwardMovies = [];
 let monitorOutroInterval = null; // Global interval variable to monitor the outro segment of the trailer
-
-if (setMutedHover) {
-    const slidesContainer = document.getElementById('slides-container');
-    slidesContainer.addEventListener('mouseenter', () => {
-        if (player) {
-            player.unMute();
-            isMuted = false;
-        }
-    });
-
-    slidesContainer.addEventListener('mouseleave', () => {
-        if (player) {
-            player.mute();
-            isMuted = true;
-        }
-    });
-}
+let isMuted = startTrailerMuted; userInteracted = false;
 
 // Get SponsorBlock-Data for the outro/intro segment of the trailer
 const fetchSponsorBlockData = async (videoId) => {
@@ -90,6 +74,13 @@ function monitorOutro(player, outroSegment) {
     }, 500); // check every 500ms
 }
 
+const clearMonitorOutroInterval = () => {
+    if (monitorOutroInterval) {
+        clearInterval(monitorOutroInterval);
+        monitorOutroInterval = null;
+    }
+};
+
 
 const createElem = (tag, className, textContent, src, alt) => {
     const elem = document.createElement(tag);
@@ -114,12 +105,14 @@ const cleanup = () => {
     player = null;
     clearTimeout(slideChangeTimeout);
     slideChangeTimeout = null;
+    clearMonitorOutroInterval();
     const container = document.getElementById('slides-container');
     if (container) container.innerHTML = '';
 };
 
 const createSlideElement = (movie, hasVideo = false) => {
     cleanup();
+    isMuted = startTrailerMuted;
     const container = document.getElementById('slides-container');
     const slide = createElem('div', 'slide');
 
@@ -288,14 +281,14 @@ const createSlideElement = (movie, hasVideo = false) => {
             width: '100%',
             videoId,
             playerVars: {
-                mute: isMuted ? 1 : 0,  // CHeck if the video should start muted
+                mute: isMuted ? 1 : 0, // Mute the video
                 controls: disableTrailerControls ? 0 : 1,    // Hide the controls
                 disablekb: 1,   // Disable keyboard controls
-                fs: 1,         // Enavle fullscreen
                 iv_load_policy: 3, // Disable annotations
+                cc_load_policy: 3, // Disable captions
             },
             events: {
-                'onReady': event => {                    
+                'onReady': () => {
                     if (useSponsorBlock) {
                         fetchSponsorBlockData(videoId).then(({ intro, outro }) => {
                             if (intro && skipIntro) {
@@ -320,6 +313,7 @@ const createSlideElement = (movie, hasVideo = false) => {
                     if (trailerMaxLength > 0) {
                         clearTimeout(slideChangeTimeout);
                         slideChangeTimeout = setTimeout(() => {
+                            clearMonitorOutroInterval();
                             if (player) {
                                 player.stopVideo();
                                 player.destroy();
@@ -329,14 +323,17 @@ const createSlideElement = (movie, hasVideo = false) => {
                         }, trailerMaxLength);
                     }
                     if (isMuted) {
-                        event.target.setVolume(0);  // Mute the video if the setting is MuteOn
+                        player.mute(); // Mute the video if the setting is MuteOn
                     } else {
-                        event.target.setVolume(unmutedVolume); // Set the volume, value between 0 and 100
+                        player.unMute();
                     }
-                    event.target.playVideo();
+
+                    player.playVideo();
+                    player.setVolume(unmutedVolume); // Set the volume, value between 0 and 100
+                    console.log(`Playing trailer for '${movie.Name}'`);
                 },
-                'onStateChange': event => {
-                    if (event.data === YT.PlayerState.PLAYING) {
+                'onStateChange': () => {
+                    if (player.getPlayerState() === YT.PlayerState.PLAYING) {
                         // Only show when YT video is successfully playing
                         const backdrop = document.querySelector('.backdrop');
                         if (backdrop) {
@@ -361,14 +358,15 @@ const createSlideElement = (movie, hasVideo = false) => {
                         if (logo) logo.style.left = 'calc(50% - 17vw)';
 
                         videoContainer.style.width = '34.4vw';
-                    } else if (event.data === YT.PlayerState.ENDED) {
-                        setTimeout(fetchRandomMovie, 100);
+                    } else if (player.getPlayerState() === YT.PlayerState.ENDED) {
+                        clearMonitorOutroInterval();
+                        setTimeout(fetchRandomMovie, 20);
                     }
                 },
                 'onError': () => {
                     console.error(`YouTube prevented playback of '${movie.Name}'`);
                     if (player) {
-                        clearInterval(monitorOutroInterval);
+                        clearMonitorOutroInterval();
                         player.destroy();
                         player = null;
                     }
@@ -686,10 +684,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const isHomePage = url => url.includes('/home') || url.endsWith('/web/') || url.endsWith('/web/index.html');
     if (isHomePage(window.top.location.href)) {
         isHomePageActive = true;
+        console.log("Homepage detected, starting slideshow");
         readCustomList().then(list => {
             if (list) { movieList = list; currentMovieIndex = 0; }
             fetchRandomMovie();
         });
+
+        if (setMutedHover) {
+            const parentBody = window.parent.document.body;
+            const hoverContainer = document.getElementById('slides-container');
+
+            // prevent error: Unmuting failed and the element was paused instead because the user didn't interact with the document before.
+            const onUserInteraction = () => {
+                userInteracted = true;
+                console.log('User interacted with the page');
+                parentBody.removeEventListener('click', onUserInteraction);
+                parentBody.removeEventListener('keydown', onUserInteraction);
+                hoverContainer.removeEventListener('click', onUserInteraction);
+                hoverContainer.removeEventListener('keydown', onUserInteraction);
+            };
+
+            parentBody.addEventListener('click', onUserInteraction);
+            parentBody.addEventListener('keydown', onUserInteraction);
+            hoverContainer.addEventListener('click', onUserInteraction);
+            hoverContainer.addEventListener('keydown', onUserInteraction);
+
+            hoverContainer.addEventListener('mouseenter', () => {
+                if (userInteracted && player && typeof player.unMute === 'function') {
+                    player.unMute();
+                    isMuted = false;
+                }
+            });
+
+            hoverContainer.addEventListener('mouseleave', () => {
+                if (userInteracted && player && typeof player.mute === 'function') {
+                    player.mute();
+                    isMuted = true;
+                }
+            });
+        }
+
     }
 });
 
