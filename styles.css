@@ -552,7 +552,7 @@ body {
 
 @media (max-width:1000px) and (orientation:landscape) {
     .slide {
-        height: 70vh;
+        height: 22em;
     }
 
     .community-rating {
