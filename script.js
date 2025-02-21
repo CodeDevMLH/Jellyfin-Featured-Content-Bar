@@ -15,6 +15,18 @@ let plotMaxLength = 550; // Maximum number of characters in the plot
 let trailerMaxLength = 0; // Default value 0; length measured in ms, set to 0 to disable, could be used instead of SponsorBlock
 let startTrailerMuted = true; // Default value true; set to false to start the video unmuted
 
+
+// Language specific strings
+// currently implemented: en, de, fr, es, it, pl, nl
+const seasonTerms = ["Season", "Staffel", "Saison", "Temporada", "Stagione", "Sezon", "Seizoen"];
+const seasonsTerms = ["Seasons", "Staffeln", "Saisons", "Temporadas", "Stagioni", "Sezony", "Seizoenen"];
+const unknownSeasonsTerms = ["Unknown seasons", "Unbekannte Staffeln","Saisons inconnues", "Temporadas desconocidas", "Stagioni sconosciute", "Nieznane sezony", "Onbekende seizoenen"];
+const movieTerms = ["Movie", "Film", "Film", "Película", "Film", "Film", "Film"];
+const moviesTerms = ["Movies", "Filme", "Films", "Películas", "Film", "Filmy", "Films"];
+const unknownMoviesTerms = ["Unknown movies", "Unbekannte Filme", "Films inconnus", "Películas desconocidas", "Film sconosciuti", "Nieznane filmy", "Onbekende films"];
+const unknownYearTerms = ["Unknown year", "Unbekanntes Jahr", "Année inconnue", "Año desconocido", "Anno sconosciuto", "Nieznany rok", "Onbekend jaar"];
+const unknownRuntimeTerms = ["Unknown Runtime", "Unbekannte Länge", "Durée inconnue", "Duración desconocida", "Durata sconosciuta", "Nieznany czas trwania", "Onbekende duur"];
+
 // get the Jellyfin credentials from the local storage (api token and user id)
 const getJellyfinCredentials = () => {
     const jellyfinCreds = localStorage.getItem("jellyfin_credentials");
@@ -46,6 +58,36 @@ let previousMovies = [];
 let forwardMovies = [];
 let monitorOutroInterval = null; // Global interval variable to monitor the outro segment of the trailer
 let isMuted = startTrailerMuted; userInteracted = false;
+
+
+// Get the current browser language
+const getBrowserLanguage = () => {
+    const language = navigator.language || navigator.userLanguage;
+    return language.split('-')[0]; // Return the language code (e.g., 'en', 'de')
+};
+const browserLanguage = getBrowserLanguage();
+
+// set corresponding language index
+const setLanguage = (language) => {
+    switch (language) {
+        case 'de':
+            return 1;
+        case 'fr':
+            return 2;
+        case 'es':
+            return 3;
+        case 'it':
+            return 4;
+        case 'pl':
+            return 5;
+        case 'nl':
+            return 6;
+        default:
+            return 0;
+    }
+};
+
+const languageIndex = setLanguage(browserLanguage);
 
 // Get SponsorBlock-Data for the outro/intro segment of the trailer
 const fetchSponsorBlockData = async (videoId) => {
@@ -147,22 +189,37 @@ const createSlideElement = (movie, hasVideo = false) => {
     slide.appendChild(createElem('div', 'heading', title));
 
     const textContainer = createElem('div', 'text-container');
-    const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : 'Unknown';
+    //const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : 'Unknown';
+    const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : unknownYearTerms[languageIndex];
 
     let additionalInfo;
 
+    // if (movie.Type === 'Series') {
+    //     additionalInfo = movie.ChildCount
+    //         ? `${movie.ChildCount} Season${movie.ChildCount > 1 ? 's' : ''}`
+    //         : 'Unknown Seasons';
+    // } else if (movie.Type === 'BoxSet') {
+    //     additionalInfo = movie.ChildCount
+    //         ? `${movie.ChildCount} Movie${movie.ChildCount > 1 ? 's' : ''}`
+    //         : 'Unknown Movies';
+    // } else {
+    //     additionalInfo = movie.RunTimeTicks
+    //         ? `${Math.round(movie.RunTimeTicks / 600000000)} min`
+    //         : 'Unknown Runtime';
+    // }
+
     if (movie.Type === 'Series') {
         additionalInfo = movie.ChildCount
-            ? `${movie.ChildCount} Season${movie.ChildCount > 1 ? 's' : ''}`
-            : 'Unknown Seasons';
+            ? `${movie.ChildCount} ${movie.ChildCount > 1 ? seasonsTerms[languageIndex] : seasonTerms[languageIndex]}`
+            : unknownSeasonsTerms[languageIndex];
     } else if (movie.Type === 'BoxSet') {
         additionalInfo = movie.ChildCount
-            ? `${movie.ChildCount} Movie${movie.ChildCount > 1 ? 's' : ''}`
-            : 'Unknown Movies';
+            ? `${movie.ChildCount} ${movie.ChildCount > 1 ? moviesTerms[languageIndex] : movieTerms[languageIndex]}`
+            : unknownMoviesTerms[languageIndex];
     } else {
         additionalInfo = movie.RunTimeTicks
             ? `${Math.round(movie.RunTimeTicks / 600000000)} min`
-            : 'Unknown Runtime';
+            : unknownRuntimeTerms[languageIndex];
     }
 
     let loremText = `
