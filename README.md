@@ -8,7 +8,7 @@ Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](h
 - small ui style fixes
 - html, css and javascript in seperate files
 
-Testet on Jellyfin 10.10.3
+Testet on Jellyfin 10.10.6
 
 ## Table of Contents
 - [SpotlightTrailer - Featured Content Bar](#spotlighttrailer---featured-content-bar)
@@ -35,9 +35,6 @@ The following configuration parameters are used to customize the behavior and ap
 
 - **`listFileName`**:  
   The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
-
-- **`token`**:  
-  Your Jellyfin API key, which is required for accessing the Jellyfin API. Replace `"YOURAPIKEYHERE"` with your actual API key.
 
 - **`moviesSeriesBoth`**:  
   Specifies the type of content to display:
@@ -102,14 +99,12 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 3. Go to your ```jellyfin-web``` folder and create a folder named ```ui``` and drop ```spotlight.html, script.js and styles.css``` in that folder
 
-4. In your Jellyfin Dashboard, under ```API Keys``` create an API key for Spotlight, copy the key, and insert it as the value for the ```token``` variable in ```script.js```. You can also set the corresponding values for list name, random selection, show it only on main page, plot length, etc.
-
-5. ```Important: Use Notepad++ for this```\
+4. ```Important: Use Notepad++ for this```\
    In the jellyfin-web folder, open the file ```home-html.RANDOMSTRINGHERE.chunk.js```
 
-6. Ctrl+F and search for ```data-backdroptype="movie,series,book">``` 
+5. Ctrl+F and search for ```data-backdroptype="movie,series,book">``` 
 
-7. Paste this after the >
+6. Paste this after the >
 
 ```js
 <style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em; height: 25em;}} </style> <iframe class="featurediframe" src="/web/ui/spotlight.html"></iframe>
