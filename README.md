@@ -32,7 +32,7 @@ Testet on Jellyfin 10.10.6
 The following configuration parameters are used to customize the behavior and appearance of the slideshow. You can adjust them at the beginning of `script.js`:
 
 - **`title`**:  
-  The title of the slideshow. Set this to a descriptive name for your slideshow. `To be done`
+  The title of the slideshow. Set this to a descriptive name for your slideshow. `To be done - Should be shown above featured bar slide`
 
 - **`listFileName`**:  
   The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
