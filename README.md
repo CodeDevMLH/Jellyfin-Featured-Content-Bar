@@ -7,6 +7,7 @@ Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](h
 - set txt list name for eg. switch between diffrent seasonal versions
 - small ui style fixes
 - html, css and javascript in seperate files
+- no hard coded api key needed
 
 Testet on Jellyfin 10.10.6
 
