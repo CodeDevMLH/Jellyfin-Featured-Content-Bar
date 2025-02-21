@@ -1,6 +1,5 @@
 let title = 'Spotlight'; // Title of the slideshow TBD
 let listFileName = 'list.txt'; // Name of the file containing the list of movie IDs
-let token = 'YOURAPIKEYHERE'; // Your Jellyfin API key
 let moviesSeriesBoth = 3; // 1 for movies, 2 for series, 3 for both
 let shuffleInterval = 15000; // Time in milliseconds before the next slide is shown, unless trailer is playing
 let useTrailers = true; // Set to false to disable trailers
@@ -16,6 +15,27 @@ let plotMaxLength = 550; // Maximum number of characters in the plot
 let trailerMaxLength = 0; // Default value 0; length measured in ms, set to 0 to disable, could be used instead of SponsorBlock
 let startTrailerMuted = true; // Default value true; set to false to start the video unmuted
 
+// get the Jellyfin credentials from the local storage (api token and user id)
+const getJellyfinCredentials = () => {
+    const jellyfinCreds = localStorage.getItem("jellyfin_credentials");
+  
+    try {
+      const serverCredentials = JSON.parse(jellyfinCreds);
+  
+      const firstServer = serverCredentials.Servers[0];
+  
+      if (!firstServer) {
+        console.error("Could not find credentials for the client");
+        return;
+      }
+  
+      return { token: firstServer.AccessToken, userId: firstServer.UserId };
+    } catch (e) {
+      console.error("Could not parse jellyfin credentials", e);
+    }
+  };
+
+const { token, userId } = getJellyfinCredentials();
 
 
 // variables
@@ -584,43 +604,32 @@ const shuffleArray = (array) => {
 };
 
 const fetchNextMovie = (useRandom = false) => {
-    const fetchCurrentUserId = () =>
-        fetch('/Sessions', { headers: { 'Authorization': `MediaBrowser Client="Jellyfin Web", Device="YourDeviceName", DeviceId="YourDeviceId", Version="YourClientVersion", Token="${token}"` } })
+    if (!userId) {
+        console.error('Could not retrieve the current user ID.');
+        isChangingSlide = false;
+        return;
+    }
+
+    const headers = { 'Authorization': `MediaBrowser Client="Jellyfin Web", Device="YourDeviceName", DeviceId="YourDeviceId", Version="YourClientVersion", Token="${token}"` };
+
+    if (!useRandom && movieList.length > 0) {
+        if (currentMovieIndex >= movieList.length) currentMovieIndex = 0;
+        const movieId = movieList[currentMovieIndex];
+        currentMovieIndex++;
+
+        fetch(`/Users/${userId}/Items/${movieId}?Fields=Overview,RemoteTrailers,PremiereDate,RunTimeTicks,ChildCount,Genres`, { headers })
             .then(response => response.json())
-            .then(sessions => {
-                const currentSession = sessions.find(session => session.UserId);
-                return currentSession ? currentSession.UserId : null;
-            })
-            .catch(() => null);
-
-    fetchCurrentUserId().then(currentUserId => {
-        if (!currentUserId) {
-            console.error('Could not retrieve the current user ID.');
-            isChangingSlide = false;
-            return;
-        }
-
-        const headers = { 'Authorization': `MediaBrowser Client="Jellyfin Web", Device="YourDeviceName", DeviceId="YourDeviceId", Version="YourClientVersion", Token="${token}"` };
-
-        if (!useRandom && movieList.length > 0) {
-            if (currentMovieIndex >= movieList.length) currentMovieIndex = 0;
-            const movieId = movieList[currentMovieIndex];
-            currentMovieIndex++;
-
-            fetch(`/Users/${currentUserId}/Items/${movieId}?Fields=Overview,RemoteTrailers,PremiereDate,RunTimeTicks,ChildCount,Genres`, { headers })
-                .then(response => response.json())
-                .then(checkBackdropAndLogo)
-                .catch(() => startSlideChangeTimer())
-                .finally(() => { isChangingSlide = false; });
-        } else {
-            const itemTypes = moviesSeriesBoth === 1 ? 'Movie' : (moviesSeriesBoth === 2 ? 'Series' : 'Movie,Series');
-            fetch(`/Users/${currentUserId}/Items?IncludeItemTypes=${itemTypes}&Recursive=true&Limit=1&SortBy=random&Fields=Id,Overview,RemoteTrailers,PremiereDate,RunTimeTicks,ChildCount,Genres`, { headers })
-                .then(response => response.json())
-                .then(data => { if (data.Items[0]) checkBackdropAndLogo(data.Items[0]); })
-                .catch(() => startSlideChangeTimer())
-                .finally(() => { isChangingSlide = false; });
-        }
-    });
+            .then(checkBackdropAndLogo)
+            .catch(() => startSlideChangeTimer())
+            .finally(() => { isChangingSlide = false; });
+    } else {
+        const itemTypes = moviesSeriesBoth === 1 ? 'Movie' : (moviesSeriesBoth === 2 ? 'Series' : 'Movie,Series');
+        fetch(`/Users/${userId}/Items?IncludeItemTypes=${itemTypes}&Recursive=true&Limit=1&SortBy=random&Fields=Id,Overview,RemoteTrailers,PremiereDate,RunTimeTicks,ChildCount,Genres`, { headers })
+            .then(response => response.json())
+            .then(data => { if (data.Items[0]) checkBackdropAndLogo(data.Items[0]); })
+            .catch(() => startSlideChangeTimer())
+            .finally(() => { isChangingSlide = false; });
+    }
 };
 
 const checkNavigation = () => {
