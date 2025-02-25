@@ -189,25 +189,9 @@ const createSlideElement = (movie, hasVideo = false) => {
     slide.appendChild(createElem('div', 'heading', title));
 
     const textContainer = createElem('div', 'text-container');
-    //const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : 'Unknown';
     const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : unknownYearTerms[languageIndex];
 
     let additionalInfo;
-
-    // if (movie.Type === 'Series') {
-    //     additionalInfo = movie.ChildCount
-    //         ? `${movie.ChildCount} Season${movie.ChildCount > 1 ? 's' : ''}`
-    //         : 'Unknown Seasons';
-    // } else if (movie.Type === 'BoxSet') {
-    //     additionalInfo = movie.ChildCount
-    //         ? `${movie.ChildCount} Movie${movie.ChildCount > 1 ? 's' : ''}`
-    //         : 'Unknown Movies';
-    // } else {
-    //     additionalInfo = movie.RunTimeTicks
-    //         ? `${Math.round(movie.RunTimeTicks / 600000000)} min`
-    //         : 'Unknown Runtime';
-    // }
-
     if (movie.Type === 'Series') {
         additionalInfo = movie.ChildCount
             ? `${movie.ChildCount} ${movie.ChildCount > 1 ? seasonsTerms[languageIndex] : seasonTerms[languageIndex]}`
@@ -616,7 +600,6 @@ const readCustomList = () =>
             title = parsedTitle || title;
 
             // Check for mute
-            // MARK: set mute
             isMuted = muteSetting === "MuteOn";
 
             // Remaining lines are media IDs
