@@ -21,11 +21,11 @@ Testet on Jellyfin 10.10.6
   - [How to feature specific content in the bar](#how-to-feature-specific-content-in-the-bar)
 - [Desktop View](#desktop-view)
 - [Mobile View (Landscape / Portrait)](#mobile-view-landscape--portrait)
-- [Fullscreen/MobileView on Deskzop Version](#fullscreenmobileview-on-deskzop-version)
 ---
 
 
-![overview](https://github.com/user-attachments/assets/cb6c5a44-9121-4fbf-820c-e888efcf20aa)
+![overview](https://github.com/user-attachments/assets/e4e5df00-94b5-406c-a684-dd48fa136cd1)
+
 
 ## Configuration Parameters
 
@@ -94,11 +94,14 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 
 ## Installation
+> [!TIP]
+> Take a look at [CodeDevMLH/Jellyfin-Mods-Automated-Script](https://github.com/CodeDevMLH/Jellyfin-Mods-Automated-Script)
+
 1. Download [spotlight.html](/spotlight.html), [script.js](/script.js) and [styles.css](/styles.css)
 
 2. Modify `script.js` like [explained above](#configuration-parameters) if necessary.
 
-3. Go to your ```jellyfin-web``` folder and create a folder named ```ui``` and drop ```spotlight.html, script.js and styles.css``` in that folder
+3. Go to your ```jellyfin-web``` folder and create a folder named ```featured``` and drop ```spotlight.html, script.js and styles.css``` in that folder
 
 4. ```Important: Use Notepad++ for this```\
    In the jellyfin-web folder, open the file ```home-html.RANDOMSTRINGHERE.chunk.js```
@@ -108,7 +111,7 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 6. Paste this after the >
 
 ```js
-<style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em; height: 25em;}} </style> <iframe class="featurediframe" src="/web/ui/spotlight.html"></iframe>
+<style> .featurediframe {width: 95vw; height: 24em; display: block; border: 0; margin: -1em auto 0;} @media (min-width: 2100px) {.featurediframe {height: 33em;}} @media (max-width: 1599px) {.featurediframe {margin-top: 1.2em;}} @media (max-width: 800px) {.featurediframe {margin-top: 0.8em; height: 25em;}} </style> <iframe class="featurediframe" src="/web/featured/spotlight.html"></iframe>
 ```
 7. Save the file.
 
@@ -119,13 +122,13 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 ## Uninstall
 
-Simply delete Step 7's snippet added to ```home-html.chunk.js``` then refresh your browser's cache. You can, but not have to delete the ui folder.
+Simply delete Step 7's snippet added to ```home-html.chunk.js``` then refresh your browser's cache. You can, but not have to delete the featured folder.
 
 ## How to feature specific content in the bar
 
 By default, the bar will feature content at random as long as it is available to the current user and no `list.txt` is available or if it is empty `below` line 1.
 
-To preselect content, place a [list.txt](/list.txt) in the ```ui``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar).
+To preselect content, place a [list.txt](/list.txt) in the ```featured``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar).
 
 `IMPORTANT` If you use List.txt to preselect content and a User has an Age Rating limit on their account (U, PG etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
 
