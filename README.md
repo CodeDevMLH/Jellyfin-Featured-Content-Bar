@@ -34,6 +34,9 @@ The following configuration parameters are used to customize the behavior and ap
 - **`title`**:  
   The title of the slideshow. Set this to true to show the title from first line of `list.txt` (see [list.txt](/list.txt)).
 
+- **`useSeasonalLists`**:  
+  Use seasonal lists, see [seasonal lists doc](/SEASONAL_LISTS.md)).
+
 - **`listFileName`**:  
   The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
 
