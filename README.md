@@ -36,7 +36,7 @@ The following configuration parameters are used to customize the behavior and ap
 ![title view](https://github.com/user-attachments/assets/74297c7d-4060-4aff-a5fd-a170320166dd)
 
 - **`useSeasonalLists`**:  
-  Use seasonal lists, see [seasonal lists doc](/SEASONAL_LISTS.md)).
+  Use seasonal lists, see [seasonal lists doc](/SEASONAL_LISTS.md).
 
 - **`listFileName`**:  
   The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
