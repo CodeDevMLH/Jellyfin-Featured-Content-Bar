@@ -1,4 +1,4 @@
-Spotlight MuteOn
+A title/name for the list MuteOn
 f81c9b854e3edc62fb049e252c488115	Use MuteOn or MuteOff to change the mute option
 7d545ge72462d6cedd74de8e2df71888	Delete line 2 and everything below for random spotlight selection
 df464nbfg66455404e62874d22ba86aa	The Hunger Games

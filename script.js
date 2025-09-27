@@ -5,7 +5,7 @@ let shuffleInterval = 15000; // Time in milliseconds before the next slide is sh
 let useTrailers = true; // Set to false to disable trailers
 let setRandomMovie = true; // Set to false to disable random movie selection from the list
 let showOnOtherPages = false; // Set to true to show the slideshow on all pages eg. favorites tab, requests tab, etc.
-//let showTitle = false; // Set to false to hide the title TBD
+let showTitle = false; // Set to true to place the slideshow title above the banner
 let disableTrailerControls = false; // Set to false to enable trailer controls
 let setMutedHover = true; // Set to false to disable unmuting the video on hover
 let unmutedVolume = 20; // Set the volume level when the video is unmuted
@@ -14,6 +14,19 @@ let skipIntro = true; // Set to true to skip the intro segment of the trailer
 let plotMaxLength = 550; // Maximum number of characters in the plot
 let trailerMaxLength = 0; // Default value 0; length measured in ms, set to 0 to disable, could be used instead of SponsorBlock
 let startTrailerMuted = true; // Default value true; set to false to start the video unmuted
+
+// Seasonal lists configuration
+let useSeasonalLists = false; // Set to true to enable automatic seasonal list switching
+const seasonalLists = {
+    spring: 'spring_list.txt',        // spring (march-may)
+    summer: 'summer_list.txt',        // summer (june-august)
+    autumn: 'autumn_list.txt',        // autumn (september-november)
+    winter: 'winter_list.txt',        // winter (december-february)
+    newyear: 'newyear_list.txt',      // new year (1.-7. januar)
+    valentine: 'valentine_list.txt',   // valentines day (10.-20. februar)
+    easter: 'easter_list.txt',        // easter (variable dates, March-April)
+    halloween: 'halloween_list.txt'   // halloween (20.-31. october)
+};
 
 
 // Language specific strings
@@ -58,6 +71,8 @@ let previousMovies = [];
 let forwardMovies = [];
 let monitorOutroInterval = null; // Global interval variable to monitor the outro segment of the trailer
 let isMuted = startTrailerMuted; userInteracted = false;
+const baseBackdropOverlapVW = 11.4;
+let activeTrailerLayout = null;
 
 
 // Get the current browser language
@@ -88,6 +103,92 @@ const setLanguage = (language) => {
 };
 
 const languageIndex = setLanguage(browserLanguage);
+
+// Seasonal list detection
+const getCurrentSeason = () => {
+    if (!useSeasonalLists) {
+        return null;
+    }
+    
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1-12
+    const day = now.getDate();
+    
+    // Special events (take precedence over seasons)
+    // new year: 1-7 january
+    if (month === 1 && day <= 7) return 'newyear';
+    
+    // valentines day: 10-20 february
+    if (month === 2 && day >= 10 && day <= 20) return 'valentine';
+    
+    // halloween: 20-31 cotober
+    if (month === 10 && day >= 20) return 'halloween';
+    
+    // Easter calculation (simplified - around March-April)
+    const easterStart = getEasterPeriod(now.getFullYear());
+    if (isInEasterPeriod(now, easterStart)) return 'easter';
+    
+    // Regular seasons
+    if (month >= 3 && month <= 5) return 'spring';     // march-may
+    if (month >= 6 && month <= 8) return 'summer';     // june-august
+    if (month >= 9 && month <= 11) return 'autumn';    // september-november
+    if (month === 12 || month <= 2) return 'winter';   // december-february
+    
+    return null;
+};
+
+// Simplified Easter calculation (Western Easter)
+const getEasterPeriod = (year) => {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    
+    return { month, day };
+};
+
+// Check if current date is in Easter period (2 weeks around Easter)
+const isInEasterPeriod = (currentDate, easter) => {
+    const easterDate = new Date(currentDate.getFullYear(), easter.month - 1, easter.day);
+    const timeDiff = Math.abs(currentDate.getTime() - easterDate.getTime());
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return daysDiff <= 7; // 1 week before and after Easter
+};
+
+// Get the appropriate list filename based on season
+const getSeasonalListFileName = async () => {
+    const season = getCurrentSeason();
+    if (!season || !seasonalLists[season]) {
+        console.log('Using default list:', listFileName);
+        return listFileName;
+    }
+    
+    // Check if seasonal file exists
+    const seasonalFile = seasonalLists[season];
+    try {
+        const response = await fetch(seasonalFile + '?' + new Date().getTime(), { method: 'HEAD' });
+        if (response.ok) {
+            console.log(`Using seasonal list for ${season}:`, seasonalFile);
+            return seasonalFile;
+        } else {
+            console.warn(`Seasonal file ${seasonalFile} not found, falling back to default list:`, listFileName);
+            return listFileName;
+        }
+    } catch (error) {
+        console.warn(`Error checking seasonal file ${seasonalFile}:`, error.message, '- falling back to default list:', listFileName);
+        return listFileName;
+    }
+};
 
 // Get SponsorBlock-Data for the outro/intro segment of the trailer
 const fetchSponsorBlockData = async (videoId) => {
@@ -161,6 +262,7 @@ function isMobile() {
 const truncateText = (text, maxLength) => text.length > maxLength ? text.substr(0, maxLength) + '...' : text;
 
 const cleanup = () => {
+    clearTrailerLayout();
     if (player && typeof player.destroy === 'function') {
         player.destroy();
     }
@@ -172,10 +274,128 @@ const cleanup = () => {
     if (container) container.innerHTML = '';
 };
 
+const clearTrailerLayout = () => {
+    if (!activeTrailerLayout) {
+        return;
+    }
+
+    const { videoContainer, backdrop, plot, genres, loremIpsum, logo } = activeTrailerLayout;
+
+    if (videoContainer) {
+        videoContainer.style.removeProperty('width');
+    }
+
+    if (backdrop) {
+        backdrop.style.removeProperty('width');
+        backdrop.style.removeProperty('left');
+    }
+
+    if (plot) {
+        plot.style.removeProperty('left');
+        plot.style.removeProperty('max-width');
+    }
+
+    if (genres) {
+        genres.style.removeProperty('left');
+    }
+
+    if (loremIpsum) {
+        loremIpsum.style.removeProperty('left');
+    }
+
+    if (logo) {
+        logo.style.removeProperty('left');
+    }
+
+    activeTrailerLayout = null;
+};
+
+const applyTrailerLayout = (videoContainer) => {
+    if (!videoContainer) {
+        return;
+    }
+
+    if (activeTrailerLayout && activeTrailerLayout.videoContainer !== videoContainer) {
+        clearTrailerLayout();
+    }
+
+    const slideWrapper = videoContainer.closest('.slide-wrapper');
+    if (!slideWrapper) {
+        return;
+    }
+
+    const slideElement = slideWrapper.querySelector('.slide');
+    const containerRect = videoContainer.getBoundingClientRect();
+    const slideRect = slideElement ? slideElement.getBoundingClientRect() : null;
+    const effectiveHeight = containerRect.height || (slideRect ? slideRect.height : 0);
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1920;
+
+    if (!effectiveHeight || !viewportWidth) {
+        return;
+    }
+
+    const idealWidthVw = (effectiveHeight * (16 / 9)) / viewportWidth * 100;
+    const videoWidthVw = Math.max(idealWidthVw, 18);
+    const videoWidthVwCapped = Math.min(videoWidthVw, 34.4);
+    const videoWidthVwRounded = Math.min(Math.max(videoWidthVwCapped, 10), 60);
+
+    const backdrop = slideWrapper.querySelector('.backdrop');
+    const plot = slideWrapper.querySelector('.plot');
+    const genres = slideWrapper.querySelector('.genres');
+    const loremIpsum = slideWrapper.querySelector('.lorem-ipsum');
+    const logo = slideWrapper.querySelector('.logo');
+
+    videoContainer.style.width = `${videoWidthVwRounded.toFixed(3)}vw`;
+
+    if (backdrop) {
+        const backdropGap = Math.max(videoWidthVwRounded - baseBackdropOverlapVW, 0).toFixed(3);
+        backdrop.style.width = `calc(100% - ${backdropGap}vw)`;
+        backdrop.style.left = '0';
+    }
+
+    if (plot) {
+        const availableAreaVw = Math.max(100 - videoWidthVwRounded, 20);
+        const maxWidth = Math.max(availableAreaVw - 4, 30).toFixed(3);
+        plot.style.left = `calc(50% - ${(videoWidthVwRounded / 2).toFixed(3)}vw)`;
+        plot.style.maxWidth = `${maxWidth}vw`;
+    }
+
+    const anchorShift = `calc(50% - ${(videoWidthVwRounded / 2).toFixed(3)}vw)`;
+    if (genres) {
+        genres.style.left = anchorShift;
+    }
+
+    if (loremIpsum) {
+        loremIpsum.style.left = anchorShift;
+    }
+
+    if (logo) {
+        logo.style.left = anchorShift;
+    }
+
+    activeTrailerLayout = {
+        videoContainer,
+        backdrop,
+        plot,
+        genres,
+        loremIpsum,
+        logo
+    };
+};
+
+window.addEventListener('resize', () => {
+    if (activeTrailerLayout && document.contains(activeTrailerLayout.videoContainer)) {
+        applyTrailerLayout(activeTrailerLayout.videoContainer);
+    } else {
+        activeTrailerLayout = null;
+    }
+});
+
 const createSlideElement = (movie, hasVideo = false) => {
     cleanup();
     isMuted = startTrailerMuted;
     const container = document.getElementById('slides-container');
+    const slideWrapper = createElem('div', 'slide-wrapper');
     const slide = createElem('div', 'slide');
 
     if (movie && (!previousMovies.length || previousMovies[previousMovies.length - 1].Id !== movie.Id)) {
@@ -186,7 +406,13 @@ const createSlideElement = (movie, hasVideo = false) => {
         previousMovies.shift();
     }
     ['backdrop', 'logo'].forEach(type => slide.appendChild(createElem('img', type, null, `/Items/${movie.Id}/Images/${type.charAt(0).toUpperCase() + type.slice(1)}${type === 'backdrop' ? '/0' : ''}`, type)));
-    slide.appendChild(createElem('div', 'heading', title));
+
+    if (showTitle && title) {
+        const heading = createElem('div', 'heading', title);
+        heading.style.display = 'flex';
+        slideWrapper.classList.add('has-heading');
+        slideWrapper.appendChild(heading);
+    }
 
     const textContainer = createElem('div', 'text-container');
     const premiereYear = movie.PremiereDate ? new Date(movie.PremiereDate).getFullYear() : unknownYearTerms[languageIndex];
@@ -393,33 +619,11 @@ const createSlideElement = (movie, hasVideo = false) => {
                     player.setVolume(unmutedVolume); // Set the volume, value between 0 and 100
                     console.log(`Playing trailer for '${movie.Name}'`);
                 },
-                'onStateChange': () => {
-                    if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-                        // Only show when YT video is successfully playing
-                        const backdrop = document.querySelector('.backdrop');
-                        if (backdrop) {
-                            backdrop.style.width = 'calc(100% - 23vw)';
-                            backdrop.style.left = '0vw';
-                        }
-                        const plot = document.querySelector('.plot');
-                        if (plot) {
-                            plot.style.left = '33vw';
-                            plot.style.maxWidth = '63vw';
-                        }
-
-                        const genres = document.querySelector('.genres');
-                        if (genres) {
-                            genres.style.left = 'calc(50% - 17vw)';
-                        }
-
-                        const loremIpsum = document.querySelector('.lorem-ipsum');
-                        if (loremIpsum) loremIpsum.style.left = 'calc(50% - 17vw)';
-
-                        const logo = document.querySelector('.logo');
-                        if (logo) logo.style.left = 'calc(50% - 17vw)';
-
-                        videoContainer.style.width = '34.4vw';
-                    } else if (player.getPlayerState() === YT.PlayerState.ENDED) {
+                'onStateChange': (event) => {
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        applyTrailerLayout(videoContainer);
+                    } else if (event.data === YT.PlayerState.ENDED) {
+                        clearTrailerLayout();
                         clearMonitorOutroInterval();
                         setTimeout(fetchRandomMovie, 20);
                     }
@@ -432,19 +636,7 @@ const createSlideElement = (movie, hasVideo = false) => {
                         player = null;
                     }
 
-                    // Reset style when a YT error occurs
-                    const backdrop = document.querySelector('.backdrop');
-                    if (backdrop) backdrop.style.width = '100%';
-
-                    const plot = document.querySelector('.plot');
-                    if (plot) plot.style.width = '98%';
-
-                    const loremIpsum = document.querySelector('.lorem-ipsum');
-                    if (loremIpsum) loremIpsum.style.paddingRight = '0';
-
-                    const logo = document.querySelector('.logo');
-                    if (logo) logo.style.left = '50%';
-
+                    clearTrailerLayout();
                     videoContainer.style.width = '0';
 
                     startSlideChangeTimer();
@@ -457,8 +649,10 @@ const createSlideElement = (movie, hasVideo = false) => {
     }
 
 
+    slideWrapper.appendChild(slide);
+
     container.innerHTML = '';
-    container.appendChild(slide);
+    container.appendChild(slideWrapper);
 };
 
 function addSwipeListeners(slide) {
@@ -584,8 +778,9 @@ const checkBackdropAndLogo = movie => {
     ).catch(() => fetchRandomMovie());
 };
 
-const readCustomList = () =>
-    fetch(listFileName + '?' + new Date().getTime())
+const readCustomList = async () => {
+    const currentListFile = await getSeasonalListFileName();
+    return fetch(currentListFile + '?' + new Date().getTime())
         .then(response => response.ok ? response.text() : null)
         .then(text => {
             if (!text || !text.trim()) {
@@ -595,12 +790,27 @@ const readCustomList = () =>
             const lines = text.split('\n').filter(Boolean);
 
             const firstLine = lines.shift().trim();
-            const [parsedTitle, muteSetting] = firstLine.split(/\s+/);
+            const tokens = firstLine.split(/\s+/).filter(Boolean);
 
-            title = parsedTitle || title;
+            let muteSetting = null;
+            if (tokens.length > 0) {
+                const lastToken = tokens[tokens.length - 1].toLowerCase();
+                if (lastToken === 'muteon' || lastToken === 'muteoff') {
+                    muteSetting = lastToken;
+                    tokens.pop();
+                }
+            }
 
-            // Check for mute
-            isMuted = muteSetting === "MuteOn";
+            const parsedTitle = tokens.join(' ').trim();
+            if (parsedTitle) {
+                title = parsedTitle;
+            }
+
+            if (muteSetting) {
+                startTrailerMuted = muteSetting === 'muteon';
+            }
+
+            isMuted = startTrailerMuted;
 
             // Remaining lines are media IDs
             const mediaList = lines.map(line => line.trim().substring(0, 32));
@@ -613,6 +823,7 @@ const readCustomList = () =>
             console.error('Error reading List.txt. Falling back to random selection.');
             return null;
         });
+};
 
 
 const fetchRandomMovie = () => {
@@ -679,14 +890,14 @@ const checkNavigation = () => {
         const isHomePage = url => url.includes('/home') || url.endsWith('/web/') || url.endsWith('/web/index.html');
 
         if (!isHomePage(newLocation) && isHomePageActive) {
-            console.log("Leaving homepage, cleaning up slideshow and stopping video");
+            console.log("Leaving home page, cleaning up slideshow and stopping video");
             isHomePageActive = false;
             stopBackgroundVideo();
             cleanup();
         }
 
         if (isHomePage(newLocation) && !isHomePageActive) {
-            console.log("Returning to homepage, reactivating slideshow");
+            console.log("Returning to home page, reactivating slideshow");
             isHomePageActive = true;
             fetchRandomMovie();
         }
@@ -733,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isHomePage = url => url.includes('/home') || url.endsWith('/web/') || url.endsWith('/web/index.html');
     if (isHomePage(window.top.location.href)) {
         isHomePageActive = true;
-        console.log("Homepage detected, starting slideshow");
+        console.log("Home page detected, starting slideshow");
         readCustomList().then(list => {
             if (list) { movieList = list; currentMovieIndex = 0; }
             fetchRandomMovie();

@@ -4,12 +4,13 @@ Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](h
 ## Main Differences in this fork
 - automatically skip outros/endcards and intros on trailers using SponsorBlock API
 - show the featured bar only at the main page, hide it in favorites/requests tab
-- set txt list name for eg. switch between diffrent seasonal versions
+- automatically switch between diffrent seasonal lists
 - small ui style fixes
 - html, css and javascript in seperate files
-- no hard coded api key needed
+- display title for featured content (optional)
+- **no hard coded api key needed**
 
-Testet on Jellyfin 10.10.6
+Testet on Jellyfin 10.10.7
 
 ## Table of Contents
 - [SpotlightTrailer - Featured Content Bar](#spotlighttrailer---featured-content-bar)
@@ -24,15 +25,14 @@ Testet on Jellyfin 10.10.6
 ---
 
 
-![overview](https://github.com/user-attachments/assets/e4e5df00-94b5-406c-a684-dd48fa136cd1)
-
+![overview](https://github.com/user-attachments/assets/cb6c5a44-9121-4fbf-820c-e888efcf20aa)
 
 ## Configuration Parameters
 
 The following configuration parameters are used to customize the behavior and appearance of the slideshow. You can adjust them at the beginning of `script.js`:
 
 - **`title`**:  
-  The title of the slideshow. Set this to a descriptive name for your slideshow. `To be done - Should be shown above featured bar slide`
+  The title of the slideshow. Set this to true to show the title from first line of `list.txt` (see [list.txt](/list.txt)).
 
 - **`listFileName`**:  
   The name of the file containing the list of movie or series IDs. Ensure this file exists in the correct location.
@@ -94,9 +94,6 @@ By adjusting these parameters, you can fine-tune the slideshow's behavior and ap
 
 
 ## Installation
-> [!TIP]
-> Take a look at [CodeDevMLH/Jellyfin-Mods-Automated-Script](https://github.com/CodeDevMLH/Jellyfin-Mods-Automated-Script)
-
 1. Download [spotlight.html](/spotlight.html), [script.js](/script.js) and [styles.css](/styles.css)
 
 2. Modify `script.js` like [explained above](#configuration-parameters) if necessary.
@@ -128,9 +125,11 @@ Simply delete Step 7's snippet added to ```home-html.chunk.js``` then refresh yo
 
 By default, the bar will feature content at random as long as it is available to the current user and no `list.txt` is available or if it is empty `below` line 1.
 
+In the first line, you can set a title for the featured bar, which can then be displayed. In addition, set MuteOn or MuteOff behind the title to control the behavoir of the trailer audio.
+
 To preselect content, place a [list.txt](/list.txt) in the ```featured``` folder and paste the ID of each piece of content to be featured (IDs can be found in the address bar).
 
-`IMPORTANT` If you use List.txt to preselect content and a User has an Age Rating limit on their account (U, PG etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
+`IMPORTANT` If you use list.txt to preselect content and a User has an Age Rating limit on their account (U, PG. FSK etc) make sure you add content for them to see too, or it will just be blank (content above their Age Limit is hidden to them)
 
 ![list](https://github.com/user-attachments/assets/5f8f7924-7a9b-49c1-aefa-198cefce0f60)
 
