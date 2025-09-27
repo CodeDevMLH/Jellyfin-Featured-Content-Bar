@@ -33,6 +33,7 @@ The following configuration parameters are used to customize the behavior and ap
 
 - **`title`**:  
   The title of the slideshow. Set this to true to show the title from first line of `list.txt` (see [list.txt](/list.txt)).
+[title view](https://github.com/user-attachments/assets/74297c7d-4060-4aff-a5fd-a170320166dd)
 
 - **`useSeasonalLists`**:  
   Use seasonal lists, see [seasonal lists doc](/SEASONAL_LISTS.md)).
