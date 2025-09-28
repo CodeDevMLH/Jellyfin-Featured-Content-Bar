@@ -134,6 +134,8 @@ body {
     font-family: "Titillium Web", sans-serif;
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
     font-size: 2em;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .details-button {
@@ -596,11 +598,13 @@ body {
     .back-button {
         top: 5em !important;
         left: 0.5em;
+        transform: none;
     }
 
     .skip-button {
         top: 5em !important;
         right: 0.5em;
+        transform: none;
     }
 
     .genres {
@@ -636,11 +640,13 @@ body {
     .back-button {
         top: 5em !important;
         left: 0.5em;
+        transform: none;
     }
 
     .skip-button {
         top: 5em !important;
         right: 0.5em;
+        transform: none;
     }
 
     .genres {
@@ -720,7 +726,8 @@ body {
         transition: background 0.3s, color 0.3s;
         color: #ffffffa1;
         left: 0.5em;
-        top: 5em;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .skip-button {
@@ -734,7 +741,8 @@ body {
         transition: background 0.3s, color 0.3s;
         color: #ffffffa1;
         right: 0.5em;
-        top: 5em;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .text-container::before {
