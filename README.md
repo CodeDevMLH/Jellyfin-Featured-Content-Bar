@@ -1,3 +1,11 @@
+# ⚠️ This repository is deprecated
+
+> **NOTE:** This project is no longer maintained here. Active development has moved.
+
+👉 **You can find the new jellyfin plugin repository here: [jellyfin-plugin-media-bar-enhanced](https://github.com/CodeDevMLH/jellyfin-plugin-media-bar-enhanced)**
+
+---
+
 # SpotlightTrailer - Featured Content Bar
 Thanks to [SethBacon](https://forum.jellyfin.org/u-sethbacon) & [BobHasNoSoul](https://github.com/BobHasNoSoul) & [MakD](https://github.com/MakD) & [tedhinklater](https://github.com/tedhinklater) for their talents and work
 
